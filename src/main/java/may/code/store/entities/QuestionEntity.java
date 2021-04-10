@@ -24,6 +24,7 @@ public class QuestionEntity {
 
     Integer questionOrder;
 
+    @Column(length = 10485760)
     String text;
 
     @ManyToOne

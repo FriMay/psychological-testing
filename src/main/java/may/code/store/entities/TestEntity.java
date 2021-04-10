@@ -22,6 +22,7 @@ public class TestEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
+    @Column(length = 10485760)
     String name;
 
     @Builder.Default

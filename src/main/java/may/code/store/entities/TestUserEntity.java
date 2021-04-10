@@ -27,6 +27,7 @@ public class TestUserEntity {
     @ManyToOne
     TestEntity test;
 
+    @Column(length = 10485760)
     @NonNull
     String answers;
 

@@ -22,6 +22,7 @@ public class AnswerEntity {
 
     Integer answerOrder;
 
+    @Column(length = 10485760)
     String name;
 
     @ManyToOne
