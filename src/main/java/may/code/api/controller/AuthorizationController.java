@@ -1,11 +1,9 @@
 package may.code.api.controller;
 
-import jdk.nashorn.internal.parser.Token;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.store.entities.PsychologistEntity;
 import may.code.api.store.entities.TokenEntity;
 import may.code.api.store.repositories.PsychologistRepository;
 import may.code.api.store.repositories.TokenRepository;
