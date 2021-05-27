@@ -1,11 +1,9 @@
-package may.code.store.entities;
+package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Builder
@@ -13,25 +11,28 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "school")
-public class SchoolEntity {
+@Table(name = "school_class")
+public class SchoolClassEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(length = 10485760)
     @NonNull
     String name;
 
-    @Builder.Default
-    @OneToMany
+    @NonNull
+    @ManyToOne
     @JoinColumn(name = "school_id", referencedColumnName = "id")
-    List<SchoolClassEntity> schoolClasses = new ArrayList<>();
+    SchoolEntity school;
 
-    public static SchoolEntity makeDefault(String schoolName) {
+    @Column(name = "school_id", updatable = false, insertable = false)
+    Long schoolId;
+
+    public static SchoolClassEntity makeDefault(String name, SchoolEntity school) {
         return builder()
-                .name(schoolName)
+                .name(name)
+                .school(school)
                 .build();
     }
 }

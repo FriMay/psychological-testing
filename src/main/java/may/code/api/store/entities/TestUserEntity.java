@@ -1,4 +1,4 @@
-package may.code.store.entities;
+package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -34,10 +34,6 @@ public class TestUserEntity {
     @Builder.Default
     @NonNull
     Instant createdAt = Instant.now();
-
-    @ManyToOne
-    @JoinColumn(name = "psychologist_id", referencedColumnName = "id")
-    PsychologistEntity psychologist;
 
     @Column(name = "psychologist_id", insertable = false, updatable = false)
     Long psychologistId;

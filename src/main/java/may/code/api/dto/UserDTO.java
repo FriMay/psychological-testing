@@ -17,7 +17,18 @@ public class UserDTO {
     Long id;
 
     @NonNull
-    String fullName;
+    String firstName;
+
+    String middleName;
+
+    @NonNull
+    String lastName;
+
+    @NonNull
+    String login;
+
+    @NonNull
+    String password;
 
     @NonNull
     Instant birthday;

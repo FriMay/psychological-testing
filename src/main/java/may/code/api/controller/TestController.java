@@ -10,8 +10,9 @@ import may.code.api.dto.TestDTO;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestDTOFactory;
-import may.code.store.entities.*;
-import may.code.store.repositories.*;
+import may.code.api.services.ControllerAuthenticationService;
+import may.code.api.store.entities.*;
+import may.code.api.store.repositories.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +36,9 @@ public class TestController {
 
     SchoolClassRepository schoolClassRepository;
 
-    PsychologistRepository psychologistRepository;
-
     TestDTOFactory testDTOFactory;
+
+    ControllerAuthenticationService authenticationService;
 
     public static final String FETCH_TESTS = "/api/tests";
     public static final String GET_TEST = "/api/tests/{testId}";
@@ -68,7 +69,11 @@ public class TestController {
     }
 
     @PostMapping(CREATE_OR_UPDATE_TEST)
-    public ResponseEntity<TestDTO> createOrUpdateTest(@RequestBody TestDTO test) {
+    public ResponseEntity<TestDTO> createOrUpdateTest(
+            @RequestBody TestDTO test,
+            @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
 
         TestEntity testEntity = convertTestToEntity(test);
 
@@ -78,12 +83,15 @@ public class TestController {
     }
 
     @DeleteMapping(DELETE_TEST)
-    public ResponseEntity<AckDTO> deleteTest(@PathVariable Long testId) {
+    public ResponseEntity<AckDTO> deleteTest(
+            @PathVariable Long testId,
+            @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
 
         TestEntity test = testRepository
                 .findById(testId)
                 .orElse(null);
-
 
         if (test != null) {
 
@@ -103,7 +111,6 @@ public class TestController {
             @PathVariable Long classId,
             @PathVariable Long testId,
             @PathVariable Long userId,
-            @PathVariable Long psychologistId,
             @RequestParam String answers) {
 
         TestEntity test = getTestOrThrowNotFound(testId);
@@ -128,18 +135,9 @@ public class TestController {
                         new NotFoundException(String.format("Пользователь с идентификатором \"%s\" не найден.", userId))
                 );
 
-        PsychologistEntity psychologist = psychologistRepository
-                .findById(psychologistId)
-                .orElseThrow(() ->
-                        new NotFoundException(
-                                String.format("Психолог с идентификатором \"%s\" не найден.", psychologistId)
-                        )
-                );
-
         testUserRepository.saveAndFlush(
                 TestUserEntity.builder()
                         .answers(answers)
-                        .psychologist(psychologist)
                         .user(user)
                         .test(test)
                         .build()

@@ -1,7 +1,7 @@
 package may.code.api.factory;
 
 import may.code.api.dto.UserDTO;
-import may.code.store.entities.UserEntity;
+import may.code.api.store.entities.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,7 +13,11 @@ public class UserDTOFactory {
     public UserDTO createUserDTO(UserEntity entity) {
         return UserDTO.builder()
                 .id(entity.getId())
-                .fullName(entity.getFullName())
+                .firstName(entity.getFirstName())
+                .middleName(entity.getMiddleName())
+                .lastName(entity.getLastName())
+                .login(entity.getLogin())
+                .password(entity.getPassword())
                 .birthday(entity.getBirthday())
                 .role(entity.getRole())
                 .schoolClassId(entity.getSchoolClass().getId())

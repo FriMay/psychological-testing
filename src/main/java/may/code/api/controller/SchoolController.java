@@ -7,8 +7,9 @@ import may.code.api.dto.AckDTO;
 import may.code.api.dto.SchoolDTO;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.factory.SchoolDTOFactory;
-import may.code.store.entities.SchoolEntity;
-import may.code.store.repositories.SchoolRepository;
+import may.code.api.services.ControllerAuthenticationService;
+import may.code.api.store.entities.SchoolEntity;
+import may.code.api.store.repositories.SchoolRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ public class SchoolController {
 
     SchoolDTOFactory schoolDTOFactory;
 
+    ControllerAuthenticationService authenticationService;
+
     public static final String FETCH_SCHOOLS = "/api/schools";
     public static final String CREATE_SCHOOL = "/api/schools/{schoolName}";
     public static final String DELETE_SCHOOL = "/api/schools/{schoolId}";
@@ -41,7 +44,11 @@ public class SchoolController {
     }
 
     @PostMapping(CREATE_SCHOOL)
-    public ResponseEntity<SchoolDTO> createSchool(@PathVariable String schoolName) {
+    public ResponseEntity<SchoolDTO> createSchool(
+            @PathVariable String schoolName,
+            @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
 
         if (schoolRepository.existsByName(schoolName)) {
             throw new BadRequestException(String.format("Школа с названием \"%s\" уже существует.", schoolName));
@@ -55,7 +62,11 @@ public class SchoolController {
     }
 
     @DeleteMapping(DELETE_SCHOOL)
-    public ResponseEntity<AckDTO> deleteSchool(@PathVariable Long schoolId) {
+    public ResponseEntity<AckDTO> deleteSchool(
+            @PathVariable Long schoolId,
+            @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
 
         if (schoolRepository.existsById(schoolId)) {
             schoolRepository.deleteById(schoolId);

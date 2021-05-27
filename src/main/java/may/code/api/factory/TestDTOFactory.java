@@ -4,9 +4,9 @@ import may.code.api.dto.AnswerDTO;
 import may.code.api.dto.LiteTestDTO;
 import may.code.api.dto.QuestionDTO;
 import may.code.api.dto.TestDTO;
-import may.code.store.entities.AnswerEntity;
-import may.code.store.entities.QuestionEntity;
-import may.code.store.entities.TestEntity;
+import may.code.api.store.entities.AnswerEntity;
+import may.code.api.store.entities.QuestionEntity;
+import may.code.api.store.entities.TestEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

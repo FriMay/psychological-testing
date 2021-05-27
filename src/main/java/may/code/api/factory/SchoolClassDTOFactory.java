@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import may.code.api.dto.SchoolClassDTO;
-import may.code.store.entities.SchoolClassEntity;
+import may.code.api.store.entities.SchoolClassEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

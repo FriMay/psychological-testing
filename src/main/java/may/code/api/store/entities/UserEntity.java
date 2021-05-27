@@ -1,4 +1,4 @@
-package may.code.store.entities;
+package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +21,12 @@ public class UserEntity {
     Long id;
 
     @NonNull
-    String fullName;
+    String firstName;
+
+    @NonNull
+    String lastName;
+
+    String middleName;
 
     @NonNull
     Instant birthday;
@@ -31,16 +36,30 @@ public class UserEntity {
     UserRole role;
 
     @NonNull
+    String login;
+
+    @NonNull
+    String password;
+
+    @NonNull
     @ManyToOne
     SchoolClassEntity schoolClass;
 
     public static UserEntity makeDefault(
-            String fullName,
+            String firstName,
+            String middleName,
+            String lastName,
+            String login,
+            String password,
             Instant birthday,
             UserRole role,
             SchoolClassEntity schoolClass) {
         return builder()
-                .fullName(fullName)
+                .firstName(firstName)
+                .middleName(middleName)
+                .lastName(lastName)
+                .login(login)
+                .password(password)
                 .birthday(birthday)
                 .role(role)
                 .schoolClass(schoolClass)

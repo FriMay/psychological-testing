@@ -1,4 +1,4 @@
-package may.code.store.entities;
+package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

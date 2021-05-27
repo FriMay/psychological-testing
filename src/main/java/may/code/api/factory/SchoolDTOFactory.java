@@ -1,7 +1,7 @@
 package may.code.api.factory;
 
 import may.code.api.dto.SchoolDTO;
-import may.code.store.entities.SchoolEntity;
+import may.code.api.store.entities.SchoolEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -1,6 +1,6 @@
-package may.code.store.repositories;
+package may.code.api.store.repositories;
 
-import may.code.store.entities.TestEntity;
+import may.code.api.store.entities.TestEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

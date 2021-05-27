@@ -1,6 +1,6 @@
-package may.code.store.repositories;
+package may.code.api.store.repositories;
 
-import may.code.store.entities.AnswerEntity;
+import may.code.api.store.entities.AnswerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AnswerRepository extends JpaRepository<AnswerEntity, Long> {
