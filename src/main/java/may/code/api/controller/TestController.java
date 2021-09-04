@@ -12,10 +12,7 @@ import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.*;
-import may.code.api.store.repositories.SchoolClassRepository;
-import may.code.api.store.repositories.TestRepository;
-import may.code.api.store.repositories.TestUserRepository;
-import may.code.api.store.repositories.UserRepository;
+import may.code.api.store.repositories.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +35,8 @@ public class TestController {
     TestUserRepository testUserRepository;
 
     SchoolClassRepository schoolClassRepository;
+
+    PsychologistRepository psychologistRepository;
 
     TestDtoFactory testDtoFactory;
 
@@ -92,19 +91,17 @@ public class TestController {
 
         authenticationService.authenticate(token);
 
-        TestEntity test = testRepository
+        testRepository
                 .findById(testId)
-                .orElse(null);
+                .ifPresent(test -> {
 
-        if (test != null) {
+                    test.getQuestions().forEach(it -> it.getAnswers().clear());
+                    test.getQuestions().clear();
 
-            test.getQuestions().forEach(it -> it.getAnswers().clear());
-            test.getQuestions().clear();
+                    test = testRepository.saveAndFlush(test);
 
-            test = testRepository.saveAndFlush(test);
-
-            testRepository.delete(test);
-        }
+                    testRepository.delete(test);
+                });
 
         return ResponseEntity.ok(AckDto.makeDefault(true));
     }
@@ -114,6 +111,7 @@ public class TestController {
             @PathVariable Long classId,
             @PathVariable Long testId,
             @PathVariable Long userId,
+            @PathVariable Long psychologistId,
             @RequestParam String answers) {
 
         TestEntity test = getTestOrThrowNotFound(testId);
@@ -138,11 +136,18 @@ public class TestController {
                         new NotFoundException(String.format("Пользователь с идентификатором \"%s\" не найден.", userId))
                 );
 
+        PsychologistEntity psychologist = psychologistRepository
+                .findById(psychologistId)
+                .orElseThrow(() ->
+                        new NotFoundException(String.format("Психолог с индентификатором \"%s\" не найден.", psychologistId))
+                );
+
         testUserRepository.saveAndFlush(
                 TestUserEntity.builder()
                         .answers(answers)
                         .user(user)
                         .test(test)
+                        .psychologist(psychologist)
                         .build()
         );
 

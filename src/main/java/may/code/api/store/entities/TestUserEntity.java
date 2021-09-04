@@ -27,6 +27,10 @@ public class TestUserEntity {
     @ManyToOne
     TestEntity test;
 
+    @NonNull
+    @ManyToOne
+    PsychologistEntity psychologist;
+
     @Column(length = 10485760)
     @NonNull
     String answers;
@@ -34,7 +38,4 @@ public class TestUserEntity {
     @Builder.Default
     @NonNull
     Instant createdAt = Instant.now();
-
-    @Column(name = "psychologist_id", insertable = false, updatable = false)
-    Long psychologistId;
 }
