@@ -3,7 +3,7 @@ package may.code.api.factory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.SchoolClassDTO;
+import may.code.api.dto.SchoolClassDto;
 import may.code.api.store.entities.SchoolClassEntity;
 import org.springframework.stereotype.Component;
 
@@ -13,22 +13,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Component
-public class SchoolClassDTOFactory {
+public class SchoolClassDtoFactory {
 
-    SchoolDTOFactory schoolDTOFactory;
+    SchoolDtoFactory schoolDtoFactory;
 
-    public SchoolClassDTO createSchoolClassDTO(SchoolClassEntity entity) {
-        return SchoolClassDTO.builder()
+    public SchoolClassDto createSchoolClassDto(SchoolClassEntity entity) {
+        return SchoolClassDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
-                .school(schoolDTOFactory.createSchoolDTO(entity.getSchool()))
+                .school(schoolDtoFactory.createSchoolDto(entity.getSchool()))
                 .build();
     }
 
-    public List<SchoolClassDTO> createSchoolClassDTOList(List<SchoolClassEntity> entities) {
+    public List<SchoolClassDto> createSchoolClassDtoList(List<SchoolClassEntity> entities) {
         return entities
                 .stream()
-                .map(this::createSchoolClassDTO)
+                .map(this::createSchoolClassDto)
                 .collect(Collectors.toList());
     }
 }

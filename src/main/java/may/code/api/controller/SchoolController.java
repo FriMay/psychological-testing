@@ -3,10 +3,10 @@ package may.code.api.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.AckDTO;
-import may.code.api.dto.SchoolDTO;
+import may.code.api.dto.AckDto;
+import may.code.api.dto.SchoolDto;
 import may.code.api.exeptions.BadRequestException;
-import may.code.api.factory.SchoolDTOFactory;
+import may.code.api.factory.SchoolDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.SchoolEntity;
 import may.code.api.store.repositories.SchoolRepository;
@@ -25,7 +25,7 @@ public class SchoolController {
 
     SchoolRepository schoolRepository;
 
-    SchoolDTOFactory schoolDTOFactory;
+    SchoolDtoFactory schoolDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
@@ -34,17 +34,17 @@ public class SchoolController {
     public static final String DELETE_SCHOOL = "/api/schools/{schoolId}";
 
     @GetMapping(FETCH_SCHOOLS)
-    public ResponseEntity<List<SchoolDTO>> fetchSchools(@RequestParam(defaultValue = "") String filter) {
+    public ResponseEntity<List<SchoolDto>> fetchSchools(@RequestParam(defaultValue = "") String filter) {
 
         boolean isFiltered = !filter.trim().isEmpty();
 
         List<SchoolEntity> schools = schoolRepository.findAllByFilter(isFiltered, filter);
 
-        return ResponseEntity.ok(schoolDTOFactory.createSchoolDTOList(schools));
+        return ResponseEntity.ok(schoolDtoFactory.createSchoolDtoList(schools));
     }
 
     @PostMapping(CREATE_SCHOOL)
-    public ResponseEntity<SchoolDTO> createSchool(
+    public ResponseEntity<SchoolDto> createSchool(
             @PathVariable String schoolName,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -58,11 +58,11 @@ public class SchoolController {
                 SchoolEntity.makeDefault(schoolName)
         );
 
-        return ResponseEntity.ok(schoolDTOFactory.createSchoolDTO(school));
+        return ResponseEntity.ok(schoolDtoFactory.createSchoolDto(school));
     }
 
     @DeleteMapping(DELETE_SCHOOL)
-    public ResponseEntity<AckDTO> deleteSchool(
+    public ResponseEntity<AckDto> deleteSchool(
             @PathVariable Long schoolId,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -72,6 +72,6 @@ public class SchoolController {
             schoolRepository.deleteById(schoolId);
         }
 
-        return ResponseEntity.ok(AckDTO.makeDefault(true));
+        return ResponseEntity.ok(AckDto.makeDefault(true));
     }
 }

@@ -28,7 +28,7 @@ public class CustomErrorController implements ErrorController {
     }
 
     @RequestMapping(CustomErrorController.PATH)
-    public ResponseEntity<ErrorDTO> error(WebRequest webRequest) {
+    public ResponseEntity<ErrorDto> error(WebRequest webRequest) {
 
         Map<String, Object> attributes = errorAttributes.getErrorAttributes(
                 webRequest,
@@ -37,7 +37,7 @@ public class CustomErrorController implements ErrorController {
 
         return ResponseEntity
                 .status((Integer) attributes.get("status"))
-                .body(ErrorDTO
+                .body(ErrorDto
                         .builder()
                         .error((String) attributes.get("error"))
                         .errorDescription((String) attributes.get("message"))

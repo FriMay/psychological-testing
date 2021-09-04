@@ -5,11 +5,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import may.code.api.domains.UserRole;
-import may.code.api.dto.AckDTO;
-import may.code.api.dto.UserDTO;
+import may.code.api.dto.AckDto;
+import may.code.api.dto.UserDto;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.factory.UserDTOFactory;
+import may.code.api.factory.UserDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.SchoolClassEntity;
 import may.code.api.store.entities.UserEntity;
@@ -25,6 +26,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Log4j2
 @RequiredArgsConstructor
 @ExtensionMethod(StringChecker.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -36,7 +38,7 @@ public class UserController {
 
     SchoolClassRepository schoolClassRepository;
 
-    UserDTOFactory userDTOFactory;
+    UserDtoFactory userDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
@@ -53,7 +55,7 @@ public class UserController {
     private static final int PASSWORD_LENGTH = 10;
 
     @GetMapping(FETCH_USERS_BY_CLASS)
-    public ResponseEntity<List<UserDTO>> fetchUsersByClass(
+    public ResponseEntity<List<UserDto>> fetchUsersByClass(
             @RequestParam(defaultValue = "") String filter,
             @PathVariable Long classId,
             @RequestHeader(defaultValue = "") String token) {
@@ -64,11 +66,11 @@ public class UserController {
 
         List<UserEntity> users = userRepository.findAllByFilterAndClass(isFiltered, filter, classId);
 
-        return ResponseEntity.ok(userDTOFactory.createUserDTOList(users));
+        return ResponseEntity.ok(userDtoFactory.createUserDtoList(users));
     }
 
     @GetMapping(FETCH_USERS)
-    public ResponseEntity<List<UserDTO>> fetchUsers(
+    public ResponseEntity<List<UserDto>> fetchUsers(
             @RequestParam(defaultValue = "") String filter,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -78,11 +80,11 @@ public class UserController {
 
         List<UserEntity> users = userRepository.findAllByFilter(isFiltered, filter);
 
-        return ResponseEntity.ok(userDTOFactory.createUserDTOList(users));
+        return ResponseEntity.ok(userDtoFactory.createUserDtoList(users));
     }
 
     @PostMapping(CREATE_USER)
-    public ResponseEntity<UserDTO> createUser(
+    public ResponseEntity<UserDto> createUser(
             @RequestParam Instant birthday,
             @RequestParam String firstName,
             @RequestParam(defaultValue = "") String middleName,
@@ -122,11 +124,11 @@ public class UserController {
                 )
         );
 
-        return ResponseEntity.ok(userDTOFactory.createUserDTO(user));
+        return ResponseEntity.ok(userDtoFactory.createUserDto(user));
     }
 
     @DeleteMapping(DELETE_USER)
-    public ResponseEntity<AckDTO> deleteUser(
+    public ResponseEntity<AckDto> deleteUser(
             @PathVariable Long userId,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -136,7 +138,7 @@ public class UserController {
             userRepository.deleteById(userId);
         }
 
-        return ResponseEntity.ok(AckDTO.makeDefault(true));
+        return ResponseEntity.ok(AckDto.makeDefault(true));
     }
 
     @GetMapping(GET_USER_ID_BY_LOGIN_AND_PASSWORD)

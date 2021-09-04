@@ -3,11 +3,11 @@ package may.code.api.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.TestUserDTO;
-import may.code.api.dto.UserDTO;
+import may.code.api.dto.TestUserDto;
+import may.code.api.dto.UserDto;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.factory.TestUserDTOFactory;
-import may.code.api.factory.UserDTOFactory;
+import may.code.api.factory.TestUserDtoFactory;
+import may.code.api.factory.UserDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.TestUserEntity;
 import may.code.api.store.repositories.SchoolClassRepository;
@@ -37,9 +37,9 @@ public class PsychologistController {
 
     SchoolClassRepository schoolClassRepository;
 
-    UserDTOFactory userDTOFactory;
+    UserDtoFactory userDtoFactory;
 
-    TestUserDTOFactory testUserDTOFactory;
+    TestUserDtoFactory testUserDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
@@ -50,7 +50,7 @@ public class PsychologistController {
     public static final String LINK_TEMPLATE = "/test/%s/class/%s";
 
     @GetMapping(GET_TEST_RESULTS)
-    public ResponseEntity<List<TestUserDTO>> getTestResults(
+    public ResponseEntity<List<TestUserDto>> getTestResults(
             @PathVariable Long testId,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -60,7 +60,7 @@ public class PsychologistController {
 
         List<TestUserEntity> testUserList = testUserRepository.findAllByTestIdAndPsychologistId(testId);
 
-        return ResponseEntity.ok(testUserDTOFactory.createTestUserDTOList(testUserList));
+        return ResponseEntity.ok(testUserDtoFactory.createTestUserDtoList(testUserList));
     }
 
     @GetMapping(GENERATE_LINK_FOR_TEST)
@@ -79,7 +79,7 @@ public class PsychologistController {
     }
 
     @GetMapping(GET_USERS_BY_CLASS)
-    public ResponseEntity<List<UserDTO>> getUsersByClass(
+    public ResponseEntity<List<UserDto>> getUsersByClass(
             @PathVariable Long classId,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -87,7 +87,7 @@ public class PsychologistController {
 
         checkClassById(classId);
 
-        List<UserDTO> users = userDTOFactory.createUserDTOList(
+        List<UserDto> users = userDtoFactory.createUserDtoList(
                 userRepository.findAllByFilterAndClass(false, "", classId)
         );
 

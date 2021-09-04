@@ -11,7 +11,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDTO {
+public class UserDto {
 
     @NonNull
     Long id;

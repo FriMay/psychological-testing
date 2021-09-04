@@ -8,11 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SchoolDTO {
+public class AnswerDto {
 
-    @NonNull
     Long id;
 
-    @NonNull
+    Integer order;
+
     String name;
 }

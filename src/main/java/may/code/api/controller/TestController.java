@@ -3,13 +3,13 @@ package may.code.api.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.AckDTO;
-import may.code.api.dto.AnswerDTO;
-import may.code.api.dto.QuestionDTO;
-import may.code.api.dto.TestDTO;
+import may.code.api.dto.AckDto;
+import may.code.api.dto.AnswerDto;
+import may.code.api.dto.QuestionDto;
+import may.code.api.dto.TestDto;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.factory.TestDTOFactory;
+import may.code.api.factory.TestDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.*;
 import may.code.api.store.repositories.SchoolClassRepository;
@@ -39,7 +39,7 @@ public class TestController {
 
     SchoolClassRepository schoolClassRepository;
 
-    TestDTOFactory testDTOFactory;
+    TestDtoFactory testDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
@@ -50,17 +50,17 @@ public class TestController {
     public static final String COMPLETE_TEST = "/api/schools/classes/{classId}/users/{userId}/tests/{testId}/psychologists/{psychologistId}/compete";
 
     @GetMapping(FETCH_TESTS)
-    public ResponseEntity<List<TestDTO>> fetchTests(@RequestParam(defaultValue = "") String filter) {
+    public ResponseEntity<List<TestDto>> fetchTests(@RequestParam(defaultValue = "") String filter) {
 
         boolean isFiltered = !filter.trim().isEmpty();
 
         List<TestEntity> tests = testRepository.findAllByFilter(isFiltered, filter);
 
-        return ResponseEntity.ok(testDTOFactory.createTestDTOList(tests));
+        return ResponseEntity.ok(testDtoFactory.createTestDtoList(tests));
     }
 
     @GetMapping(GET_TEST)
-    public ResponseEntity<TestDTO> getTest(@PathVariable Long testId) {
+    public ResponseEntity<TestDto> getTest(@PathVariable Long testId) {
 
         TestEntity test = testRepository
                 .findById(testId)
@@ -68,12 +68,12 @@ public class TestController {
                         new NotFoundException(String.format("Тест с идентификатором \"%s\" не найден.", testId))
                 );
 
-        return ResponseEntity.ok(testDTOFactory.createTestDTO(test));
+        return ResponseEntity.ok(testDtoFactory.createTestDto(test));
     }
 
     @PostMapping(CREATE_OR_UPDATE_TEST)
-    public ResponseEntity<TestDTO> createOrUpdateTest(
-            @RequestBody TestDTO test,
+    public ResponseEntity<TestDto> createOrUpdateTest(
+            @RequestBody TestDto test,
             @RequestHeader(defaultValue = "") String token) {
 
         authenticationService.authenticate(token);
@@ -82,11 +82,11 @@ public class TestController {
 
         testEntity = testRepository.saveAndFlush(testEntity);
 
-        return ResponseEntity.ok(testDTOFactory.createTestDTO(testEntity));
+        return ResponseEntity.ok(testDtoFactory.createTestDto(testEntity));
     }
 
     @DeleteMapping(DELETE_TEST)
-    public ResponseEntity<AckDTO> deleteTest(
+    public ResponseEntity<AckDto> deleteTest(
             @PathVariable Long testId,
             @RequestHeader(defaultValue = "") String token) {
 
@@ -106,11 +106,11 @@ public class TestController {
             testRepository.delete(test);
         }
 
-        return ResponseEntity.ok(AckDTO.makeDefault(true));
+        return ResponseEntity.ok(AckDto.makeDefault(true));
     }
 
     @PostMapping(COMPLETE_TEST)
-    public ResponseEntity<AckDTO> completeTest(
+    public ResponseEntity<AckDto> completeTest(
             @PathVariable Long classId,
             @PathVariable Long testId,
             @PathVariable Long userId,
@@ -146,7 +146,7 @@ public class TestController {
                         .build()
         );
 
-        return ResponseEntity.ok(AckDTO.makeDefault(true));
+        return ResponseEntity.ok(AckDto.makeDefault(true));
     }
 
     private TestEntity getTestOrThrowNotFound(Long testId) {
@@ -157,7 +157,7 @@ public class TestController {
                 );
     }
 
-    private TestEntity convertTestToEntity(TestDTO dto) {
+    private TestEntity convertTestToEntity(TestDto dto) {
 
         Long testId = dto.getId();
 
@@ -185,7 +185,7 @@ public class TestController {
         return test;
     }
 
-    private QuestionEntity convertQuestionToEntity(QuestionDTO dto) {
+    private QuestionEntity convertQuestionToEntity(QuestionDto dto) {
 
         QuestionEntity question = QuestionEntity.makeDefault();
 
@@ -204,7 +204,7 @@ public class TestController {
         return question;
     }
 
-    private AnswerEntity convertAnswerToEntity(AnswerDTO dto) {
+    private AnswerEntity convertAnswerToEntity(AnswerDto dto) {
 
         AnswerEntity answer = AnswerEntity.makeDefault();
 

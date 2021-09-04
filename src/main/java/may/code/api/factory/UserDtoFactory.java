@@ -1,6 +1,6 @@
 package may.code.api.factory;
 
-import may.code.api.dto.UserDTO;
+import may.code.api.dto.UserDto;
 import may.code.api.store.entities.UserEntity;
 import org.springframework.stereotype.Component;
 
@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class UserDTOFactory {
+public class UserDtoFactory {
 
-    public UserDTO createUserDTO(UserEntity entity) {
-        return UserDTO.builder()
+    public UserDto createUserDto(UserEntity entity) {
+        return UserDto.builder()
                 .id(entity.getId())
                 .firstName(entity.getFirstName())
                 .middleName(entity.getMiddleName())
@@ -24,10 +24,10 @@ public class UserDTOFactory {
                 .build();
     }
 
-    public List<UserDTO> createUserDTOList(List<UserEntity> entities) {
+    public List<UserDto> createUserDtoList(List<UserEntity> entities) {
         return entities
                 .stream()
-                .map(this::createUserDTO)
+                .map(this::createUserDto)
                 .collect(Collectors.toList());
     }
 }

@@ -2,21 +2,16 @@ package may.code.api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QuestionDTO {
-
-    Long id;
-
-    Integer order;
-
-    String text;
-
-    List<AnswerDTO> answers;
+public class TestDto extends LiteTestDto {
+    List<QuestionDto> questions;
 }

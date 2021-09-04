@@ -8,11 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TestUserDTO {
+public class TestUserDto {
 
-    LiteTestDTO test;
+    LiteTestDto test;
 
     String answers;
 
-    UserDTO user;
+    UserDto user;
 }

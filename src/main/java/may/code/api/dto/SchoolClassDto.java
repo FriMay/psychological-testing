@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SchoolClassDTO {
+public class SchoolClassDto {
 
     @NonNull
     Long id;
@@ -17,5 +17,5 @@ public class SchoolClassDTO {
     String name;
 
     @NonNull
-    SchoolDTO school;
+    SchoolDto school;
 }

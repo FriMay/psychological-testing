@@ -1,9 +1,9 @@
 package may.code.api.factory;
 
-import may.code.api.dto.AnswerDTO;
-import may.code.api.dto.LiteTestDTO;
-import may.code.api.dto.QuestionDTO;
-import may.code.api.dto.TestDTO;
+import may.code.api.dto.AnswerDto;
+import may.code.api.dto.LiteTestDto;
+import may.code.api.dto.QuestionDto;
+import may.code.api.dto.TestDto;
 import may.code.api.store.entities.AnswerEntity;
 import may.code.api.store.entities.QuestionEntity;
 import may.code.api.store.entities.TestEntity;
@@ -13,58 +13,58 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class TestDTOFactory {
+public class TestDtoFactory {
 
-    public LiteTestDTO createLiteTestDTO(TestEntity entity) {
-        return LiteTestDTO.builder()
+    public LiteTestDto createLiteTestDto(TestEntity entity) {
+        return LiteTestDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .build();
     }
 
-    public TestDTO createTestDTO(TestEntity entity) {
-        return TestDTO.builder()
+    public TestDto createTestDto(TestEntity entity) {
+        return TestDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
-                .questions(createQuestionDTOList(entity.getQuestions()))
+                .questions(createQuestionDtoList(entity.getQuestions()))
                 .build();
     }
 
-    public List<TestDTO> createTestDTOList(List<TestEntity> entities) {
+    public List<TestDto> createTestDtoList(List<TestEntity> entities) {
         return entities
                 .stream()
-                .map(this::createTestDTO)
+                .map(this::createTestDto)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
-    public List<QuestionDTO> createQuestionDTOList(List<QuestionEntity> entities) {
+    public List<QuestionDto> createQuestionDtoList(List<QuestionEntity> entities) {
         return entities
                 .stream()
-                .map(this::createQuestionDTO)
+                .map(this::createQuestionDto)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
-    public QuestionDTO createQuestionDTO(QuestionEntity entity) {
-        return QuestionDTO.builder()
+    public QuestionDto createQuestionDto(QuestionEntity entity) {
+        return QuestionDto.builder()
                 .id(entity.getId())
                 .text(entity.getText())
                 .order(entity.getQuestionOrder())
-                .answers(createAnswerDTOList(entity.getAnswers()))
+                .answers(createAnswerDtoList(entity.getAnswers()))
                 .build();
     }
 
-    public List<AnswerDTO> createAnswerDTOList(List<AnswerEntity> entities) {
+    public List<AnswerDto> createAnswerDtoList(List<AnswerEntity> entities) {
         return entities
                 .stream()
-                .map(this::createAnswerDTO)
+                .map(this::createAnswerDto)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
-    public AnswerDTO createAnswerDTO(AnswerEntity entity) {
-        return AnswerDTO.builder()
+    public AnswerDto createAnswerDto(AnswerEntity entity) {
+        return AnswerDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .order(entity.getAnswerOrder())

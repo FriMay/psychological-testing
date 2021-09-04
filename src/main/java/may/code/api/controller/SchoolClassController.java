@@ -3,10 +3,10 @@ package may.code.api.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.AckDTO;
-import may.code.api.dto.SchoolClassDTO;
+import may.code.api.dto.AckDto;
+import may.code.api.dto.SchoolClassDto;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.factory.SchoolClassDTOFactory;
+import may.code.api.factory.SchoolClassDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.SchoolClassEntity;
 import may.code.api.store.entities.SchoolEntity;
@@ -30,7 +30,7 @@ public class SchoolClassController {
 
     SchoolClassRepository schoolClassRepository;
 
-    SchoolClassDTOFactory schoolClassDTOFactory;
+    SchoolClassDtoFactory schoolClassDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
@@ -39,7 +39,7 @@ public class SchoolClassController {
     public static final String DELETE_SCHOOL_CLASS = "/api/schools/{schoolId}/classes/{classId}";
 
     @GetMapping(FETCH_SCHOOL_CLASSES)
-    public ResponseEntity<List<SchoolClassDTO>> fetchSchoolClasses(
+    public ResponseEntity<List<SchoolClassDto>> fetchSchoolClasses(
             @PathVariable Long schoolId,
             @RequestParam(defaultValue = "") String prefix) {
 
@@ -51,11 +51,11 @@ public class SchoolClassController {
                 .filter(it -> it.getName().toLowerCase().startsWith(prefix.toLowerCase()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(schoolClassDTOFactory.createSchoolClassDTOList(schoolClasses));
+        return ResponseEntity.ok(schoolClassDtoFactory.createSchoolClassDtoList(schoolClasses));
     }
 
     @PostMapping(CREATE_SCHOOL_CLASS)
-    public ResponseEntity<SchoolClassDTO> createSchoolClass(
+    public ResponseEntity<SchoolClassDto> createSchoolClass(
             @PathVariable Long schoolId,
             @PathVariable String className,
             @RequestHeader(defaultValue = "") String token) {
@@ -67,11 +67,11 @@ public class SchoolClassController {
         SchoolClassEntity schoolClass = schoolClassRepository
                 .saveAndFlush(SchoolClassEntity.makeDefault(className.toUpperCase(), school));
 
-        return ResponseEntity.ok(schoolClassDTOFactory.createSchoolClassDTO(schoolClass));
+        return ResponseEntity.ok(schoolClassDtoFactory.createSchoolClassDto(schoolClass));
     }
 
     @DeleteMapping(DELETE_SCHOOL_CLASS)
-    public ResponseEntity<AckDTO> deleteSchoolClass(
+    public ResponseEntity<AckDto> deleteSchoolClass(
             @PathVariable Long schoolId,
             @PathVariable Long classId,
             @RequestHeader(defaultValue = "") String token) {
@@ -80,7 +80,7 @@ public class SchoolClassController {
 
         schoolClassRepository.deleteByIdAndSchoolId(classId, schoolId);
 
-        return ResponseEntity.ok(AckDTO.makeDefault(true));
+        return ResponseEntity.ok(AckDto.makeDefault(true));
     }
 
     private SchoolEntity getSchoolOrThrowNotFound(Long schoolId) {

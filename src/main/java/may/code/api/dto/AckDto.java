@@ -8,11 +8,13 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AnswerDTO {
+public class AckDto {
 
-    Long id;
+    Boolean answer;
 
-    Integer order;
-
-    String name;
+    public static AckDto makeDefault(Boolean answer) {
+        return builder()
+                .answer(answer)
+                .build();
+    }
 }
