@@ -18,5 +18,5 @@ public class TestedUserAnswer implements Serializable {
 
     Integer answer_id;
 
-    Instant created_at;
+    Long created_at;
 }

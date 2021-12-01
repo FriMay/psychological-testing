@@ -2,6 +2,7 @@ package may.code.api.controller;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import may.code.api.domains.TestedUserAnswer;
 import may.code.api.dto.AckDto;
 import may.code.api.dto.AnswerDto;
 import may.code.api.dto.QuestionDto;
@@ -16,6 +17,7 @@ import may.code.api.store.repositories.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,9 +132,22 @@ public class TestController {
                         )
                 );
 
+        var answers = testedUserAnswersDto
+                .getTestedUserAnswers()
+                .stream()
+                .map(it ->
+                        TestedUserAnswer.builder()
+                                .answer_id(it.getAnswerId())
+                                .question_id(it.getQuestionId())
+                                .created_at(it.getCreatedAt().toEpochMilli())
+                                .build()
+                )
+                .collect(Collectors.toList());
+
         testAnswerRepository.saveAndFlush(
                 TestAnswerEntity.builder()
-//                        .answers(answers)
+                        .answers(answers)
+                        .startAt(testedUserAnswersDto.getStartAt())
                         .testedUser(user)
                         .test(test)
                         .build()
@@ -147,7 +162,10 @@ public class TestController {
     @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     private static class TestedUserAnswersDto {
+
         List<TestedUserAnswerDto> testedUserAnswers;
+
+        Instant startAt;
     }
 
     private void checkAllAnswers(List<TestedUserAnswerDto> testedUserAnswers, TestEntity test) {
@@ -163,7 +181,6 @@ public class TestController {
                 .getQuestions()
                 .forEach(question -> {
 
-                    //TODO: Check question contains answer, which user send
                     if (Objects.isNull(questionIdToAnswerIdMap.get(question.getId()))) {
                         throw new BadRequestException("Вы ответили не на все вопросы.");
                     }

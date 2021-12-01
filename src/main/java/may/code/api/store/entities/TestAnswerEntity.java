@@ -40,7 +40,8 @@ public class TestAnswerEntity {
     @Column(columnDefinition = "jsonb", length = 20000)
     List<TestedUserAnswer> answers;
 
+    Instant startAt;
+
     @Builder.Default
-    @NonNull
-    Instant createdAt = Instant.now();
+    Instant endAt = Instant.now();
 }
