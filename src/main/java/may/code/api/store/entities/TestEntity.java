@@ -7,7 +7,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,16 +19,25 @@ public class TestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
-    @Column(length = 10485760)
+    @Column(length = 256)
     String name;
 
     @Builder.Default
-    Boolean isStarted = false;
+    Boolean status = false;
+
+    @ManyToOne
+    @JoinColumn(name = "psychologist_id", referencedColumnName = "id")
+    PsychologistEntity psychologist;
 
     @Builder.Default
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "test_id", referencedColumnName = "id")
+    List<TestAnswerEntity> testAnswers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", referencedColumnName = "id")
     List<QuestionEntity> questions = new ArrayList<>();
 

@@ -10,9 +10,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AnswerDto {
 
-    Long id;
+    Integer id;
 
-    Integer order;
+    Short order;
 
-    String name;
+    String text;
 }

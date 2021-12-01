@@ -1,8 +1,8 @@
-package may.code.api.dto;
+package may.code.api.dto.tested_user;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.UserRole;
+import may.code.api.domains.TestedUserStatus;
 
 import java.time.Instant;
 
@@ -11,10 +11,10 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDto {
+public class TestedUserDto {
 
     @NonNull
-    Long id;
+    Integer id;
 
     @NonNull
     String firstName;
@@ -34,8 +34,8 @@ public class UserDto {
     Instant birthday;
 
     @NonNull
-    UserRole role;
+    TestedUserStatus role;
 
     @NonNull
-    Long schoolClassId;
+    Integer schoolClassId;
 }

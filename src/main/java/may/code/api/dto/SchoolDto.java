@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class SchoolDto {
 
     @NonNull
-    Long id;
+    Integer id;
 
     @NonNull
     String name;

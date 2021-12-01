@@ -1,42 +1,37 @@
 package may.code.api.controller;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import may.code.api.dto.AckDto;
 import may.code.api.dto.AnswerDto;
 import may.code.api.dto.QuestionDto;
 import may.code.api.dto.TestDto;
+import may.code.api.dto.tested_user.TestedUserAnswerDto;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.*;
 import may.code.api.store.repositories.*;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@Controller
+@RestController
 @Transactional
 public class TestController {
 
     TestRepository testRepository;
 
-    UserRepository userRepository;
+    TestedUserRepository testedUserRepository;
 
-    TestUserRepository testUserRepository;
+    TestAnswerRepository testAnswerRepository;
 
     SchoolClassRepository schoolClassRepository;
-
-    PsychologistRepository psychologistRepository;
 
     TestDtoFactory testDtoFactory;
 
@@ -46,20 +41,23 @@ public class TestController {
     public static final String GET_TEST = "/api/tests/{testId}";
     public static final String CREATE_OR_UPDATE_TEST = "/api/tests";
     public static final String DELETE_TEST = "/api/tests/{testId}";
-    public static final String COMPLETE_TEST = "/api/schools/classes/{classId}/users/{userId}/tests/{testId}/psychologists/{psychologistId}/compete";
+    public static final String COMPLETE_TEST = "/api/tested-users/{testedUserId}/tests/{testId}/compete";
 
     @GetMapping(FETCH_TESTS)
-    public ResponseEntity<List<TestDto>> fetchTests(@RequestParam(defaultValue = "") String filter) {
+    public List<TestDto> fetchTests(@RequestParam(defaultValue = "") String filter,
+                                    @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
 
         boolean isFiltered = !filter.trim().isEmpty();
 
         List<TestEntity> tests = testRepository.findAllByFilter(isFiltered, filter);
 
-        return ResponseEntity.ok(testDtoFactory.createTestDtoList(tests));
+        return testDtoFactory.createTestDtoList(tests);
     }
 
     @GetMapping(GET_TEST)
-    public ResponseEntity<TestDto> getTest(@PathVariable Long testId) {
+    public TestDto getTest(@PathVariable Integer testId) {
 
         TestEntity test = testRepository
                 .findById(testId)
@@ -67,13 +65,13 @@ public class TestController {
                         new NotFoundException(String.format("Тест с идентификатором \"%s\" не найден.", testId))
                 );
 
-        return ResponseEntity.ok(testDtoFactory.createTestDto(test));
+        return testDtoFactory.createTestDto(test);
     }
 
+    //TODO: Modify logic
     @PostMapping(CREATE_OR_UPDATE_TEST)
-    public ResponseEntity<TestDto> createOrUpdateTest(
-            @RequestBody TestDto test,
-            @RequestHeader(defaultValue = "") String token) {
+    public TestDto createOrUpdateTest(@RequestBody TestDto test,
+                                      @RequestHeader(defaultValue = "") String token) {
 
         authenticationService.authenticate(token);
 
@@ -81,80 +79,98 @@ public class TestController {
 
         testEntity = testRepository.saveAndFlush(testEntity);
 
-        return ResponseEntity.ok(testDtoFactory.createTestDto(testEntity));
+        return testDtoFactory.createTestDto(testEntity);
     }
 
     @DeleteMapping(DELETE_TEST)
-    public ResponseEntity<AckDto> deleteTest(
-            @PathVariable Long testId,
-            @RequestHeader(defaultValue = "") String token) {
+    public AckDto deleteTest(@PathVariable Integer testId,
+                             @RequestHeader(defaultValue = "") String token) {
 
-        authenticationService.authenticate(token);
+        PsychologistEntity psychologist = authenticationService.authenticate(token);
 
-        testRepository
-                .findById(testId)
-                .ifPresent(test -> {
+        TestEntity test = psychologist
+                .getTests()
+                .stream()
+                .filter(it -> Objects.equals(it.getId(), testId))
+                .findAny()
+                .orElseThrow(() ->
+                        new NotFoundException(String.format("Тест с \"%s\" идентификатором не найден.", testId))
+                );
 
-                    test.getQuestions().forEach(it -> it.getAnswers().clear());
-                    test.getQuestions().clear();
+        test.getQuestions().forEach(it -> it.getAnswers().clear());
+        test.getQuestions().clear();
 
-                    test = testRepository.saveAndFlush(test);
+        test = testRepository.saveAndFlush(test);
 
-                    testRepository.delete(test);
-                });
+        testRepository.delete(test);
 
-        return ResponseEntity.ok(AckDto.makeDefault(true));
+        return AckDto.makeDefault(true);
     }
 
     @PostMapping(COMPLETE_TEST)
-    public ResponseEntity<AckDto> completeTest(
-            @PathVariable Long classId,
-            @PathVariable Long testId,
-            @PathVariable Long userId,
-            @PathVariable Long psychologistId,
-            @RequestParam String answers) {
+    public AckDto completeTest(@PathVariable Integer testId,
+                               @PathVariable Integer testedUserId,
+                               @RequestBody TestedUserAnswersDto testedUserAnswersDto) {
 
-        TestEntity test = getTestOrThrowNotFound(testId);
+        TestEntity test = getTestOrThrowException(testId);
 
-        List<String> answerList = Arrays.stream(answers.split(","))
-                .filter(it -> !it.trim().isEmpty())
-                .collect(Collectors.toList());
+        List<TestedUserAnswerDto> testedUserAnswers = testedUserAnswersDto.getTestedUserAnswers();
 
-        if (answerList.size() != test.getQuestions().size()) {
+        if (testedUserAnswers.size() != test.getQuestions().size()) {
             throw new BadRequestException("Вы ответили не на все вопросы.");
         }
 
-        schoolClassRepository
-                .findById(classId)
+        checkAllAnswers(testedUserAnswers, test);
+
+        TestedUserEntity user = testedUserRepository
+                .findById(testedUserId)
                 .orElseThrow(() ->
-                        new NotFoundException(String.format("Класс с идентификатором \"%s\" не найден.", classId))
+                        new NotFoundException(
+                                String.format("Пользователь с идентификатором \"%s\" не найден.", testedUserId)
+                        )
                 );
 
-        UserEntity user = userRepository
-                .findByIdAndSchoolClassId(userId, classId)
-                .orElseThrow(() ->
-                        new NotFoundException(String.format("Пользователь с идентификатором \"%s\" не найден.", userId))
-                );
-
-        PsychologistEntity psychologist = psychologistRepository
-                .findById(psychologistId)
-                .orElseThrow(() ->
-                        new NotFoundException(String.format("Психолог с индентификатором \"%s\" не найден.", psychologistId))
-                );
-
-        testUserRepository.saveAndFlush(
-                TestUserEntity.builder()
-                        .answers(answers)
-                        .user(user)
+        testAnswerRepository.saveAndFlush(
+                TestAnswerEntity.builder()
+//                        .answers(answers)
+                        .testedUser(user)
                         .test(test)
-                        .psychologist(psychologist)
                         .build()
         );
 
-        return ResponseEntity.ok(AckDto.makeDefault(true));
+        return AckDto.makeDefault(true);
     }
 
-    private TestEntity getTestOrThrowNotFound(Long testId) {
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    private static class TestedUserAnswersDto {
+        List<TestedUserAnswerDto> testedUserAnswers;
+    }
+
+    private void checkAllAnswers(List<TestedUserAnswerDto> testedUserAnswers, TestEntity test) {
+
+        Map<Integer, Integer> questionIdToAnswerIdMap = new HashMap<>();
+
+        testedUserAnswers
+                .forEach(testedUserAnswer ->
+                        questionIdToAnswerIdMap.put(testedUserAnswer.getQuestionId(), testedUserAnswer.getAnswerId())
+                );
+
+        test
+                .getQuestions()
+                .forEach(question -> {
+
+                    //TODO: Check question contains answer, which user send
+                    if (Objects.isNull(questionIdToAnswerIdMap.get(question.getId()))) {
+                        throw new BadRequestException("Вы ответили не на все вопросы.");
+                    }
+                });
+    }
+
+    private TestEntity getTestOrThrowException(Integer testId) {
         return testRepository
                 .findById(testId)
                 .orElseThrow(() ->
@@ -164,7 +180,7 @@ public class TestController {
 
     private TestEntity convertTestToEntity(TestDto dto) {
 
-        Long testId = dto.getId();
+        Integer testId = dto.getId();
 
         TestEntity test;
         if (testId == null) {
@@ -214,7 +230,7 @@ public class TestController {
         AnswerEntity answer = AnswerEntity.makeDefault();
 
         answer.setId(dto.getId());
-        answer.setName(dto.getName());
+        answer.setText(dto.getText());
         answer.setAnswerOrder(dto.getOrder());
 
         return answer;

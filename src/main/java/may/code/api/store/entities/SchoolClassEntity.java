@@ -4,8 +4,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,10 +19,16 @@ public class SchoolClassEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
+    @Column(length = 8)
     @NonNull
     String name;
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_class_id", referencedColumnName = "id")
+    List<TestedUserEntity> testedUsers = new ArrayList<>();
 
     @NonNull
     @ManyToOne
@@ -27,7 +36,7 @@ public class SchoolClassEntity {
     SchoolEntity school;
 
     @Column(name = "school_id", updatable = false, insertable = false)
-    Long schoolId;
+    Integer schoolId;
 
     public static SchoolClassEntity makeDefault(String name, SchoolEntity school) {
         return builder()

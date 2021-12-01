@@ -3,13 +3,12 @@ package may.code.api.store.entities;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +28,8 @@ public class TokenEntity {
 
     @Builder.Default
     Instant createdAt = Instant.now();
+
+    @ManyToOne
+    @JoinColumn(name = "psychologist_id", referencedColumnName = "id")
+    PsychologistEntity psychologist;
 }

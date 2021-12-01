@@ -5,7 +5,8 @@ import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,12 +17,12 @@ public class AnswerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
-    Integer answerOrder;
+    Short answerOrder;
 
-    @Column(length = 10485760)
-    String name;
+    @Column(length = 50)
+    String text;
 
     @ManyToOne
     @JoinColumn(name = "question_id", referencedColumnName = "id")

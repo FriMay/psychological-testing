@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LiteTestDto {
 
-    Long id;
+    Integer id;
 
     String name;
 }

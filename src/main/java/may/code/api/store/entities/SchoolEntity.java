@@ -7,7 +7,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,9 +19,9 @@ public class SchoolEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
-    @Column(length = 10485760)
+    @Column(length = 128)
     @NonNull
     String name;
 
@@ -30,6 +31,7 @@ public class SchoolEntity {
     List<SchoolClassEntity> schoolClasses = new ArrayList<>();
 
     public static SchoolEntity makeDefault(String schoolName) {
+
         return builder()
                 .name(schoolName)
                 .build();

@@ -2,6 +2,7 @@ package may.code.api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import may.code.api.dto.tested_user.TestedUserAnswerDto;
 
 import java.util.List;
 
@@ -10,13 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QuestionDto {
-
-    Integer id;
-
-    Short order;
+public class PersonTemplateDto {
 
     String text;
 
-    List<AnswerDto> answers;
+    List<TestedUserAnswerDto> testedUserAnswers;
 }

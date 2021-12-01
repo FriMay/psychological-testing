@@ -1,17 +1,18 @@
 package may.code.api.factory;
 
-import may.code.api.dto.UserDto;
-import may.code.api.store.entities.UserEntity;
+import may.code.api.dto.tested_user.TestedUserDto;
+import may.code.api.store.entities.TestedUserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class UserDtoFactory {
+public class TestedUserDtoFactory {
 
-    public UserDto createUserDto(UserEntity entity) {
-        return UserDto.builder()
+    public TestedUserDto createTestedUserDto(TestedUserEntity entity) {
+
+        return TestedUserDto.builder()
                 .id(entity.getId())
                 .firstName(entity.getFirstName())
                 .middleName(entity.getMiddleName())
@@ -19,15 +20,16 @@ public class UserDtoFactory {
                 .login(entity.getLogin())
                 .password(entity.getPassword())
                 .birthday(entity.getBirthday())
-                .role(entity.getRole())
+                .role(entity.getStatus())
                 .schoolClassId(entity.getSchoolClass().getId())
                 .build();
     }
 
-    public List<UserDto> createUserDtoList(List<UserEntity> entities) {
+    public List<TestedUserDto> createTestedUserDtoList(List<TestedUserEntity> entities) {
+
         return entities
                 .stream()
-                .map(this::createUserDto)
+                .map(this::createTestedUserDto)
                 .collect(Collectors.toList());
     }
 }

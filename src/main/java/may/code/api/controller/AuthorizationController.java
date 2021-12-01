@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import may.code.api.exeptions.NotFoundException;
+import may.code.api.store.entities.PsychologistEntity;
 import may.code.api.store.entities.TokenEntity;
 import may.code.api.store.repositories.PsychologistRepository;
 import may.code.api.store.repositories.TokenRepository;
@@ -31,11 +32,15 @@ public class AuthorizationController {
             @RequestParam String login,
             @RequestParam String password) {
 
-        psychologistRepository
+        PsychologistEntity psychologist = psychologistRepository
                 .findTopByLoginAndPassword(login, password)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким логином и паролем не найден."));
 
-        TokenEntity tokenEntity = tokenRepository.saveAndFlush(TokenEntity.builder().build());
+        TokenEntity tokenEntity = tokenRepository.saveAndFlush(
+                TokenEntity.builder()
+                        .psychologist(psychologist)
+                        .build()
+        );
 
         return ResponseEntity.ok(tokenEntity.getToken());
     }

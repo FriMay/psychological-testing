@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import may.code.api.dto.TestUserDto;
-import may.code.api.store.entities.TestUserEntity;
+import may.code.api.store.entities.TestAnswerEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,17 +17,17 @@ public class TestUserDtoFactory {
 
     TestDtoFactory testDtoFactory;
 
-    UserDtoFactory userDtoFactory;
+    TestedUserDtoFactory testedUserDtoFactory;
 
-    public List<TestUserDto> createTestUserDtoList(List<TestUserEntity> entities) {
+    public List<TestUserDto> createTestUserDtoList(List<TestAnswerEntity> entities) {
         return entities.stream().map(this::createTestUserDtoList).collect(Collectors.toList());
     }
 
-    public TestUserDto createTestUserDtoList(TestUserEntity entity) {
+    public TestUserDto createTestUserDtoList(TestAnswerEntity entity) {
         return TestUserDto.builder()
                 .test(testDtoFactory.createLiteTestDto(entity.getTest()))
-                .user(userDtoFactory.createUserDto(entity.getUser()))
-                .answers(entity.getAnswers())
+                .user(testedUserDtoFactory.createTestedUserDto(entity.getTestedUser()))
+//                .answers(entity.getAnswers())
                 .build();
     }
 }

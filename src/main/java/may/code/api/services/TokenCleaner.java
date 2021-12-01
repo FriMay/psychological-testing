@@ -22,5 +22,4 @@ public class TokenCleaner {
     public void clean() {
         tokenRepository.deleteAllByExpiredAtBefore(Instant.now());
     }
-
 }

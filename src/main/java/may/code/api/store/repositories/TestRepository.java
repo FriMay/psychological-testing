@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface TestRepository extends JpaRepository<TestEntity, Long> {
+public interface TestRepository extends JpaRepository<TestEntity, Integer> {
 
     @Query("SELECT t FROM TestEntity t " +
             "WHERE :isFiltered = FALSE " +

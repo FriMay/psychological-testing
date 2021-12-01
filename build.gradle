@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 /**
  * Spring
  */
@@ -23,6 +27,8 @@ dependencies {
  * Other
  */
 dependencies {
+    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.9.11'
+
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
 
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'

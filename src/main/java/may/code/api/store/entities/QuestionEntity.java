@@ -7,7 +7,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,11 +19,11 @@ public class QuestionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
-    Integer questionOrder;
+    Short questionOrder;
 
-    @Column(length = 10485760)
+    @Column(length = 256)
     String text;
 
     @ManyToOne
@@ -33,7 +34,7 @@ public class QuestionEntity {
     Long testId;
 
     @Builder.Default
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     List<AnswerEntity> answers = new ArrayList<>();
 

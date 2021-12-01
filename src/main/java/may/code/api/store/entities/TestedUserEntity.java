@@ -2,57 +2,65 @@ package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.UserRole;
+import may.code.api.domains.TestedUserStatus;
 
 import javax.persistence.*;
 import java.time.Instant;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "tested_user")
+public class TestedUserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    Integer id;
 
+    @Column(length = 64)
     @NonNull
     String firstName;
 
+    @Column(length = 64)
     @NonNull
     String lastName;
 
+    @Column(length = 64)
     String middleName;
 
     @NonNull
     Instant birthday;
 
+    @Column(length = 64)
     @NonNull
     @Enumerated(EnumType.STRING)
-    UserRole role;
+    TestedUserStatus status;
 
+    @Column(length = 128)
     @NonNull
     String login;
 
+    @Column(length = 10)
     @NonNull
     String password;
 
     @NonNull
     @ManyToOne
+    @JoinColumn(name = "school_class_id", referencedColumnName = "id")
     SchoolClassEntity schoolClass;
 
-    public static UserEntity makeDefault(
+    public static TestedUserEntity makeDefault(
             String firstName,
             String middleName,
             String lastName,
             String login,
             String password,
             Instant birthday,
-            UserRole role,
+            TestedUserStatus status,
             SchoolClassEntity schoolClass) {
         return builder()
                 .firstName(firstName)
@@ -61,7 +69,7 @@ public class UserEntity {
                 .login(login)
                 .password(password)
                 .birthday(birthday)
-                .role(role)
+                .status(status)
                 .schoolClass(schoolClass)
                 .build();
     }
