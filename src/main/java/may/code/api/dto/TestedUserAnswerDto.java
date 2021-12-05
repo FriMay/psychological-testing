@@ -3,18 +3,18 @@ package may.code.api.dto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.Instant;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PersonTemplateDto {
+public class TestedUserAnswerDto {
 
-    Integer id;
+    Integer questionId;
 
-    String text;
+    Integer answerId;
 
-    List<UserShouldAnswerDto> userShouldAnswers;
+    Instant createdAt;
 }

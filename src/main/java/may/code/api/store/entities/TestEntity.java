@@ -34,6 +34,11 @@ public class TestEntity {
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", referencedColumnName = "id")
+    List<PersonTemplateEntity> personTemplates = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "test_id", referencedColumnName = "id")
     List<TestAnswerEntity> testAnswers = new ArrayList<>();
 
     @Builder.Default

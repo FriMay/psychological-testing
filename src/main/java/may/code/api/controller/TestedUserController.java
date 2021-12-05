@@ -7,7 +7,7 @@ import lombok.experimental.ExtensionMethod;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import may.code.api.domains.TestedUserStatus;
-import may.code.api.dto.tested_user.TestedUserDto;
+import may.code.api.dto.TestedUserDto;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestedUserDtoFactory;
@@ -17,12 +17,11 @@ import may.code.api.store.entities.SchoolClassEntity;
 import may.code.api.store.entities.TestedUserEntity;
 import may.code.api.store.repositories.TestedUserRepository;
 import may.code.api.utils.StringChecker;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,80 +29,61 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @ExtensionMethod(StringChecker.class)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@Controller
+@RestController
 @Transactional
 public class TestedUserController {
 
     TestedUserRepository testedUserRepository;
 
+    TestedUserDtoFactory testedUserDtoFactory;
+
+    ControllerAuthenticationService authenticationService;
+
     public static final String AUTHORIZE = "/api/tested-users/authorize";
+    public static final String GET_SCHOOL_CLASS_TESTED_USERS = "/api/tested-users";
+    public static final String CREATE_USER = "/api/tested-users";
+
+    private static final String CYRILLIC_TO_LATIN = "Russian-Latin/BGN";
+
+    private static final Transliterator toLatinTrans = Transliterator.getInstance(CYRILLIC_TO_LATIN);
+
+    private static final int PASSWORD_LENGTH = 10;
 
     @GetMapping(AUTHORIZE)
-    public ResponseEntity<Integer> authorize(
+    public Integer authorize(
             @RequestParam String login,
             @RequestParam String password) {
 
-        TestedUserEntity user = testedUserRepository
+        return testedUserRepository
                 .findTopByLoginAndPassword(login, password)
+                .map(TestedUserEntity::getId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким логином и паролем не существует."));
-
-        return ResponseEntity.ok(user.getId());
     }
 
-//    SchoolClassRepository schoolClassRepository;
-//
-    TestedUserDtoFactory testedUserDtoFactory;
-//
-    ControllerAuthenticationService authenticationService;
+    @GetMapping(GET_SCHOOL_CLASS_TESTED_USERS)
+    public List<TestedUserDto> fetchUsers(
+            @RequestHeader(defaultValue = "") String token) {
 
-//    public static final String FETCH_USERS = "/api/schools/classes/users";
-//    public static final String FETCH_USERS_BY_CLASS = "/api/classes/{classId}/users";
-    public static final String CREATE_USER = "/api/schools/classes/{classId}/users";
-//    public static final String DELETE_USER = "/api/schools/classes/users/{userId}";
+        PsychologistEntity psychologist = authenticationService.authenticate(token);
 
-    private static final String CYRILLIC_TO_LATIN = "Russian-Latin/BGN";
-//
-    private static final Transliterator toLatinTrans = Transliterator.getInstance(CYRILLIC_TO_LATIN);
-//
-    private static final int PASSWORD_LENGTH = 10;
+        SchoolClassEntity schoolClass = psychologist.getSchoolClass();
 
-//    @GetMapping(FETCH_USERS_BY_CLASS)
-//    public ResponseEntity<List<TestedUserDto>> fetchUsersByClass(
-//            @RequestParam(defaultValue = "") String filter,
-//            @PathVariable Integer classId,
-//            @RequestHeader(defaultValue = "") String token) {
-//
-//        authenticationService.authenticate(token);
-//
-//        boolean isFiltered = !filter.trim().isEmpty();
-//
-//        List<TestedUserEntity> users = testedUserRepository.findAllByFilterAndClass(isFiltered, filter, classId);
-//
-//        return ResponseEntity.ok(testedUserDtoFactory.createTestedUserDtoList(users));
-//    }
-//
-//    @GetMapping(FETCH_USERS)
-//    public ResponseEntity<List<TestedUserDto>> fetchUsers(
-//            @RequestParam(defaultValue = "") String filter,
-//            @RequestHeader(defaultValue = "") String token) {
-//
-//        authenticationService.authenticate(token);
-//
-//        boolean isFiltered = !filter.trim().isEmpty();
-//
-//        List<TestedUserEntity> users = testedUserRepository.findAllByFilter(isFiltered, filter);
-//
-//        return ResponseEntity.ok(testedUserDtoFactory.createTestedUserDtoList(users));
-//    }
+        if (Objects.isNull(schoolClass)) {
+            throw new BadRequestException("Вы не привязаны ни к одному из классов.");
+        }
+
+        List<TestedUserEntity> users = schoolClass.getTestedUsers();
+
+        return testedUserDtoFactory.createTestedUserDtoList(users);
+    }
 
     @PostMapping(CREATE_USER)
-    public ResponseEntity<TestedUserDto> createUser(
+    public TestedUserDto createUser(
             @RequestParam Instant birthday,
             @RequestParam String firstName,
             @RequestParam(defaultValue = "") String middleName,
             @RequestParam String lastName,
             @RequestParam TestedUserStatus testedUserStatus,
-            @PathVariable Integer classId,
             @RequestHeader(defaultValue = "") String token) {
 
         PsychologistEntity psychologist = authenticationService.authenticate(token);
@@ -140,23 +120,9 @@ public class TestedUserController {
                 )
         );
 
-        return ResponseEntity.ok(testedUserDtoFactory.createTestedUserDto(user));
+        return testedUserDtoFactory.createTestedUserDto(user);
     }
 
-//    @DeleteMapping(DELETE_USER)
-//    public ResponseEntity<AckDto> deleteUser(
-//            @PathVariable Integer userId,
-//            @RequestHeader(defaultValue = "") String token) {
-//
-//        authenticationService.authenticate(token);
-//
-//        if (testedUserRepository.existsById(userId)) {
-//            testedUserRepository.deleteById(userId);
-//        }
-//
-//        return ResponseEntity.ok(AckDto.makeDefault(true));
-//    }
-//
     private String makeLogin(String firstName, String lastName) {
 
         String firstNameTransliterated = toLatinTrans.transliterate(firstName.toLowerCase());

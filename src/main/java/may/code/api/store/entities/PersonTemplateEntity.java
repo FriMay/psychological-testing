@@ -4,6 +4,7 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import may.code.api.domains.TestedUserAnswer;
+import may.code.api.domains.UserShouldAnswer;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -31,9 +32,10 @@ public class PersonTemplateEntity {
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb", length = 20000)
-    List<TestedUserAnswer> answers;
+    @JoinColumn(name = "test_id", referencedColumnName = "id")
+    List<UserShouldAnswer> answers;
 
-    @NonNull
     @ManyToOne
+    @JoinColumn(name = "test_id", referencedColumnName = "id")
     TestEntity test;
 }

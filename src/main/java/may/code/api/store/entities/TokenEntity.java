@@ -32,4 +32,8 @@ public class TokenEntity {
     @ManyToOne
     @JoinColumn(name = "psychologist_id", referencedColumnName = "id")
     PsychologistEntity psychologist;
+
+    public void updateExpiredAt() {
+        this.expiredAt = Instant.now().plusSeconds(EXPIRED_SECONDS);
+    }
 }

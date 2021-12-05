@@ -1,4 +1,4 @@
-package may.code.api.dto.tested_user;
+package may.code.api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

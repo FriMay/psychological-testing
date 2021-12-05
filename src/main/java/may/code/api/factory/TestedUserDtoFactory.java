@@ -1,6 +1,6 @@
 package may.code.api.factory;
 
-import may.code.api.dto.tested_user.TestedUserDto;
+import may.code.api.dto.TestedUserDto;
 import may.code.api.store.entities.TestedUserEntity;
 import org.springframework.stereotype.Component;
 

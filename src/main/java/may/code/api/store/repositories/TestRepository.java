@@ -9,8 +9,9 @@ import java.util.List;
 public interface TestRepository extends JpaRepository<TestEntity, Integer> {
 
     @Query("SELECT t FROM TestEntity t " +
-            "WHERE :isFiltered = FALSE " +
+            "WHERE t.psychologist.id =:psychologistId " +
+                "AND :isFiltered = FALSE " +
                 "OR LOWER(t.name) LIKE LOWER(CONCAT('%', :filter, '%'))" +
             "ORDER BY t.name")
-    List<TestEntity> findAllByFilter(boolean isFiltered, String filter);
+    List<TestEntity> findAllByFilter(boolean isFiltered, String filter, Integer psychologistId);
 }

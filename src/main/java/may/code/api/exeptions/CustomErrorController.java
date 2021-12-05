@@ -22,7 +22,6 @@ public class CustomErrorController implements ErrorController {
 
     ErrorAttributes errorAttributes;
 
-    @Override
     public String getErrorPath() {
         return PATH;
     }

@@ -3,17 +3,20 @@ package may.code.api.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.TestUserDto;
-import may.code.api.dto.tested_user.TestedUserDto;
+import may.code.api.domains.IPersonTemplateAnalyze;
+import may.code.api.dto.AckDto;
+import may.code.api.dto.PersonAnalyzeDto;
+import may.code.api.dto.TestAnswerDto;
 import may.code.api.exeptions.AccessDeniedException;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
-import may.code.api.factory.TestUserDtoFactory;
-import may.code.api.factory.TestedUserDtoFactory;
+import may.code.api.factory.TestAnswerDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
+import may.code.api.services.TestService;
 import may.code.api.store.entities.PsychologistEntity;
 import may.code.api.store.entities.SchoolClassEntity;
 import may.code.api.store.entities.TestEntity;
+import may.code.api.store.repositories.TestAnswerRepository;
 import may.code.api.store.repositories.TestRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +24,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -30,31 +32,34 @@ import java.util.Objects;
 @Transactional
 public class PsychologistController {
 
-    TestRepository testRepository;
+    TestService testService;
 
-    TestedUserDtoFactory testedUserDtoFactory;
-
-    TestUserDtoFactory testUserDtoFactory;
+    TestAnswerDtoFactory testAnswerDtoFactory;
 
     ControllerAuthenticationService authenticationService;
 
-    public static final String GET_TEST_RESULTS = "/api/psychologists/tests/{testId}/results";
-    public static final String GET_SCHOOL_CLASS_TESTED_USERS = "/api/psychologists/tested_users";
+    public static final String GET_TEST_ANSWERS = "/api/psychologists/tests/{testId}/results";
     public static final String GENERATE_LINK_FOR_TEST = "/api/psychologists/tests/{testId}/generate-link";
 
-    public static final String LINK_TEMPLATE = "/test/%s/class/%s";
 
-    @GetMapping(GET_TEST_RESULTS)
-    public List<TestUserDto> getTestResults(@PathVariable Integer testId,
-                                            @RequestHeader(defaultValue = "") String token) {
+    @GetMapping(GET_TEST_ANSWERS)
+    public List<TestAnswerDto> getTestAnswers(@PathVariable Integer testId,
+                                              @RequestHeader(defaultValue = "") String token) {
 
         PsychologistEntity psychologist = authenticationService.authenticate(token);
 
-        TestEntity test = getTestOrThrowException(testId);
+        SchoolClassEntity schoolClass = psychologist.getSchoolClass();
 
-        checkTestByPsychologistAndTest(psychologist, test);
+        if (Objects.isNull(schoolClass)) {
+            throw new BadRequestException("Вы не привязаны ни к одному классу.");
+        }
 
-        return testUserDtoFactory.createTestUserDtoList(test.getTestAnswers());
+        TestEntity test = testService.getTestOrThrowException(psychologist, testId);
+
+        Map<Integer, List<PersonAnalyzeDto>> testAnswerIdToPersonAnalyze = testService
+                .getTestAnswerIdToPersonAnalyze(schoolClass, test);
+
+        return testAnswerDtoFactory.createTestAnswerDtoList(test.getTestAnswers(), testAnswerIdToPersonAnalyze);
     }
 
     @GetMapping(GENERATE_LINK_FOR_TEST)
@@ -62,47 +67,6 @@ public class PsychologistController {
 
         PsychologistEntity psychologist = authenticationService.authenticate(token);
 
-        TestEntity test = getTestOrThrowException(testId);
-
-        checkTestByPsychologistAndTest(psychologist, test);
-
-        SchoolClassEntity schoolClass = psychologist.getSchoolClass();
-
-        if (Objects.isNull(schoolClass)) {
-
-            throw new BadRequestException(
-                    "Вы не можете сгенерировать ссылку, так как не привязаны ни к одному классу."
-            );
-        }
-
-        return String.format(LINK_TEMPLATE, testId, schoolClass.getId());
-    }
-
-    @GetMapping(GET_SCHOOL_CLASS_TESTED_USERS)
-    public List<TestedUserDto> getSchoolClassTestedUsers(@RequestHeader(defaultValue = "") String token) {
-
-        PsychologistEntity psychologist = authenticationService.authenticate(token);
-
-        if (Objects.isNull(psychologist.getSchoolClass())) {
-            throw new BadRequestException("Вы не привязаны ни к одному из классов.");
-        }
-
-        return testedUserDtoFactory.createTestedUserDtoList(psychologist.getSchoolClass().getTestedUsers());
-    }
-
-    private void checkTestByPsychologistAndTest(PsychologistEntity psychologist, TestEntity test) {
-
-        if (!Objects.equals(test.getPsychologist().getId(), psychologist.getId())) {
-            throw new AccessDeniedException("Вы не можете сгенерировать ссылку на чужой тест.");
-        }
-    }
-
-    private TestEntity getTestOrThrowException(Integer testId) {
-
-        return testRepository
-                .findById(testId)
-                .orElseThrow(() ->
-                        new NotFoundException(String.format("Тест с идентификатором \"%s\" не найден.", testId))
-                );
+        return testService.generateLinkForTest(psychologist, testId);
     }
 }

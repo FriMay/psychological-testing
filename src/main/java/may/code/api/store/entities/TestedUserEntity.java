@@ -2,10 +2,13 @@ package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import may.code.api.domains.TestedUserAnswer;
 import may.code.api.domains.TestedUserStatus;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -43,6 +46,11 @@ public class TestedUserEntity {
     @Column(length = 128)
     @NonNull
     String login;
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "tested_user_id", referencedColumnName = "id")
+    List<TestAnswerEntity> testedUserAnswers = new ArrayList<>();
 
     @Column(length = 10)
     @NonNull

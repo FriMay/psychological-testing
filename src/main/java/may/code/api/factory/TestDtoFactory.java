@@ -1,10 +1,8 @@
 package may.code.api.factory;
 
-import may.code.api.dto.AnswerDto;
-import may.code.api.dto.LiteTestDto;
-import may.code.api.dto.QuestionDto;
-import may.code.api.dto.TestDto;
+import may.code.api.dto.*;
 import may.code.api.store.entities.AnswerEntity;
+import may.code.api.store.entities.PersonTemplateEntity;
 import may.code.api.store.entities.QuestionEntity;
 import may.code.api.store.entities.TestEntity;
 import org.springframework.stereotype.Component;
@@ -16,6 +14,7 @@ import java.util.stream.Collectors;
 public class TestDtoFactory {
 
     public LiteTestDto createLiteTestDto(TestEntity entity) {
+
         return LiteTestDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -23,10 +22,39 @@ public class TestDtoFactory {
     }
 
     public TestDto createTestDto(TestEntity entity) {
+
         return TestDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .questions(createQuestionDtoList(entity.getQuestions()))
+                .personTemplates(createPersonTemplateDtoList(entity.getPersonTemplates()))
+                .build();
+    }
+
+    public List<PersonTemplateDto> createPersonTemplateDtoList(List<PersonTemplateEntity> entities) {
+
+        return entities
+                .stream()
+                .map(this::createPersonTemplateDto)
+                .collect(Collectors.toList());
+    }
+
+    public PersonTemplateDto createPersonTemplateDto(PersonTemplateEntity entity) {
+
+        return PersonTemplateDto.builder()
+                .id(entity.getId())
+                .text(entity.getText())
+                .userShouldAnswers(
+                        entity
+                                .getAnswers()
+                                .stream()
+                                .map(it -> UserShouldAnswerDto.builder()
+                                        .answerId(it.getAnswer_id())
+                                        .questionId(it.getQuestion_id())
+                                        .build()
+                                )
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -70,4 +98,5 @@ public class TestDtoFactory {
                 .order(entity.getAnswerOrder())
                 .build();
     }
+
 }

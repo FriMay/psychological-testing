@@ -3,11 +3,8 @@ package may.code.api.controller;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import may.code.api.domains.TestedUserAnswer;
-import may.code.api.dto.AckDto;
-import may.code.api.dto.AnswerDto;
-import may.code.api.dto.QuestionDto;
-import may.code.api.dto.TestDto;
-import may.code.api.dto.tested_user.TestedUserAnswerDto;
+import may.code.api.domains.UserShouldAnswer;
+import may.code.api.dto.*;
 import may.code.api.exeptions.BadRequestException;
 import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestDtoFactory;
@@ -33,8 +30,6 @@ public class TestController {
 
     TestAnswerRepository testAnswerRepository;
 
-    SchoolClassRepository schoolClassRepository;
-
     TestDtoFactory testDtoFactory;
 
     ControllerAuthenticationService authenticationService;
@@ -42,6 +37,7 @@ public class TestController {
     public static final String FETCH_TESTS = "/api/tests";
     public static final String GET_TEST = "/api/tests/{testId}";
     public static final String CREATE_OR_UPDATE_TEST = "/api/tests";
+    public static final String UPDATE_PERSON_TEMPLATES = "/api/tests/{testId}/person-templates";
     public static final String DELETE_TEST = "/api/tests/{testId}";
     public static final String COMPLETE_TEST = "/api/tested-users/{testedUserId}/tests/{testId}/compete";
 
@@ -49,11 +45,11 @@ public class TestController {
     public List<TestDto> fetchTests(@RequestParam(defaultValue = "") String filter,
                                     @RequestHeader(defaultValue = "") String token) {
 
-        authenticationService.authenticate(token);
+        PsychologistEntity psychologist = authenticationService.authenticate(token);
 
         boolean isFiltered = !filter.trim().isEmpty();
 
-        List<TestEntity> tests = testRepository.findAllByFilter(isFiltered, filter);
+        List<TestEntity> tests = testRepository.findAllByFilter(isFiltered, filter, psychologist.getId());
 
         return testDtoFactory.createTestDtoList(tests);
     }
@@ -70,18 +66,50 @@ public class TestController {
         return testDtoFactory.createTestDto(test);
     }
 
-    //TODO: Modify logic
     @PostMapping(CREATE_OR_UPDATE_TEST)
     public TestDto createOrUpdateTest(@RequestBody TestDto test,
                                       @RequestHeader(defaultValue = "") String token) {
 
-        authenticationService.authenticate(token);
+        PsychologistEntity psychologist = authenticationService.authenticate(token);
 
         TestEntity testEntity = convertTestToEntity(test);
 
         testEntity = testRepository.saveAndFlush(testEntity);
 
+        testEntity.setPsychologist(psychologist);
+
         return testDtoFactory.createTestDto(testEntity);
+    }
+
+    @PostMapping(UPDATE_PERSON_TEMPLATES)
+    public TestDto updatePersonTemplates(
+            @PathVariable Integer testId,
+            @RequestBody List<PersonTemplateDto> personTemplates,
+            @RequestHeader(defaultValue = "") String token) {
+
+        authenticationService.authenticate(token);
+
+        TestEntity test = testRepository
+                .findById(testId)
+                .orElseThrow(() ->
+                        new NotFoundException(String.format("Тест с идентификатором \"%s\" не найден.", testId))
+                );
+
+        test.getPersonTemplates().clear();
+        test.getPersonTemplates().addAll(
+               personTemplates
+                       .stream()
+                       .map(this::convertToPersonTemplateEntity)
+                       .collect(Collectors.toList())
+        );
+
+        for (PersonTemplateEntity it: test.getPersonTemplates()) {
+            it.setTest(test);
+        }
+
+        test = testRepository.saveAndFlush(test);
+
+        return testDtoFactory.createTestDto(test);
     }
 
     @DeleteMapping(DELETE_TEST)
@@ -110,13 +138,12 @@ public class TestController {
     }
 
     @PostMapping(COMPLETE_TEST)
-    public AckDto completeTest(@PathVariable Integer testId,
-                               @PathVariable Integer testedUserId,
-                               @RequestBody TestedUserAnswersDto testedUserAnswersDto) {
+    public AckDto completeTest(@PathVariable Integer testedUserId,
+                               @PathVariable Integer testId,
+                               @RequestParam Instant startAt,
+                               @RequestBody List<TestedUserAnswerDto> testedUserAnswers) {
 
         TestEntity test = getTestOrThrowException(testId);
-
-        List<TestedUserAnswerDto> testedUserAnswers = testedUserAnswersDto.getTestedUserAnswers();
 
         if (testedUserAnswers.size() != test.getQuestions().size()) {
             throw new BadRequestException("Вы ответили не на все вопросы.");
@@ -132,8 +159,7 @@ public class TestController {
                         )
                 );
 
-        var answers = testedUserAnswersDto
-                .getTestedUserAnswers()
+        var answers = testedUserAnswers
                 .stream()
                 .map(it ->
                         TestedUserAnswer.builder()
@@ -147,25 +173,13 @@ public class TestController {
         testAnswerRepository.saveAndFlush(
                 TestAnswerEntity.builder()
                         .answers(answers)
-                        .startAt(testedUserAnswersDto.getStartAt())
+                        .startAt(startAt)
                         .testedUser(user)
                         .test(test)
                         .build()
         );
 
         return AckDto.makeDefault(true);
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    private static class TestedUserAnswersDto {
-
-        List<TestedUserAnswerDto> testedUserAnswers;
-
-        Instant startAt;
     }
 
     private void checkAllAnswers(List<TestedUserAnswerDto> testedUserAnswers, TestEntity test) {
@@ -221,6 +235,26 @@ public class TestController {
         );
 
         return test;
+    }
+
+    private PersonTemplateEntity convertToPersonTemplateEntity(PersonTemplateDto dto) {
+
+        return PersonTemplateEntity.builder()
+                .id(dto.getId())
+                .text(dto.getText())
+                .answers(
+                        dto.getUserShouldAnswers()
+                                .stream()
+                                .map(it ->
+                                        UserShouldAnswer.builder()
+                                                .answer_id(it.getAnswerId())
+                                                .question_id(it.getQuestionId())
+                                                .build()
+                                )
+                                .collect(Collectors.toList())
+                )
+                .build();
+
     }
 
     private QuestionEntity convertQuestionToEntity(QuestionDto dto) {

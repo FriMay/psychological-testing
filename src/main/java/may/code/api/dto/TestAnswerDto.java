@@ -2,18 +2,21 @@ package may.code.api.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import may.code.api.dto.tested_user.TestedUserDto;
+
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TestUserDto {
+public class TestAnswerDto {
 
     LiteTestDto test;
 
-    String answers;
+    List<TestedUserAnswerDto> answers;
+
+    List<PersonAnalyzeDto> personAnalyzes;
 
     TestedUserDto user;
 }

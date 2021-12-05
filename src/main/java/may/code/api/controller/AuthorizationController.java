@@ -25,7 +25,7 @@ public class AuthorizationController {
 
     PsychologistRepository psychologistRepository;
 
-    public static final String AUTHORIZE = "/api/psychologists/authorizations";
+    public static final String AUTHORIZE = "/api/psychologists/authorize";
 
     @GetMapping(AUTHORIZE)
     public ResponseEntity<String> authorize(
@@ -36,11 +36,17 @@ public class AuthorizationController {
                 .findTopByLoginAndPassword(login, password)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким логином и паролем не найден."));
 
-        TokenEntity tokenEntity = tokenRepository.saveAndFlush(
-                TokenEntity.builder()
+        TokenEntity tokenEntity = tokenRepository
+                .findByPsychologistId(psychologist.getId())
+                .orElseGet(() ->
+                        TokenEntity.builder()
                         .psychologist(psychologist)
                         .build()
-        );
+                );
+
+        tokenEntity.updateExpiredAt();
+
+        tokenEntity = tokenRepository.saveAndFlush(tokenEntity);
 
         return ResponseEntity.ok(tokenEntity.getToken());
     }
