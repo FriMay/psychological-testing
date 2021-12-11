@@ -123,7 +123,7 @@ public class TestedUserController {
         return testedUserDtoFactory.createTestedUserDto(user);
     }
 
-    private String makeLogin(String firstName, String lastName) {
+    public static String makeLogin(String firstName, String lastName) {
 
         String firstNameTransliterated = toLatinTrans.transliterate(firstName.toLowerCase());
 
@@ -132,7 +132,7 @@ public class TestedUserController {
         return String.format("%s.%s", firstNameTransliterated.charAt(0), lastNameTransliterated);
     }
 
-    private String makePassword() {
+    public static String makePassword() {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0, PASSWORD_LENGTH);
     }
 }

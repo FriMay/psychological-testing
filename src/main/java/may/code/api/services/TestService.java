@@ -65,7 +65,20 @@ public class TestService {
             );
         }
 
-        return String.format(LINK_TEMPLATE, testId, schoolClass.getId());
+        return generateLink(testId, schoolClass.getId());
+    }
+
+    public static String generateLink(Integer testId, Integer schoolClassId) {
+
+        if (Objects.isNull(testId) || testId < 0) {
+            throw new IllegalArgumentException("Поле testId не может быть пустым или меньше 0.");
+        }
+
+        if (Objects.isNull(schoolClassId) || schoolClassId < 0) {
+            throw new IllegalArgumentException("Поле schoolClassId не может быть пустым или меньше 0.");
+        }
+
+        return String.format(LINK_TEMPLATE, testId, schoolClassId);
     }
 
     public TestEntity getTestOrThrowException(PsychologistEntity psychologist, Integer testId) {
