@@ -3,7 +3,6 @@ package may.code.api.factory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.IPersonTemplateAnalyze;
 import may.code.api.dto.PersonAnalyzeDto;
 import may.code.api.dto.TestAnswerDto;
 import may.code.api.dto.TestedUserAnswerDto;

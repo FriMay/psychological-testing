@@ -1,6 +1,5 @@
 package may.code;
 
-import lombok.extern.log4j.Log4j2;
 import may.code.api.exeptions.CustomErrorController;
 import may.code.api.factory.TestAnswerDtoFactory;
 import may.code.api.factory.TestDtoFactory;

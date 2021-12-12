@@ -2,7 +2,6 @@ package may.code.api.store.entities;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.TestedUserAnswer;
 import may.code.api.domains.TestedUserStatus;
 
 import javax.persistence.*;

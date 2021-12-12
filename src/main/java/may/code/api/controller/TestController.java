@@ -1,7 +1,9 @@
 package may.code.api.controller;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.var;
 import may.code.api.domains.TestedUserAnswer;
 import may.code.api.domains.UserShouldAnswer;
 import may.code.api.dto.*;
@@ -10,12 +12,17 @@ import may.code.api.exeptions.NotFoundException;
 import may.code.api.factory.TestDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
 import may.code.api.store.entities.*;
-import may.code.api.store.repositories.*;
+import may.code.api.store.repositories.TestAnswerRepository;
+import may.code.api.store.repositories.TestRepository;
+import may.code.api.store.repositories.TestedUserRepository;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor

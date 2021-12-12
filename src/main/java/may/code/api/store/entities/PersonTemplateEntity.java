@@ -3,7 +3,6 @@ package may.code.api.store.entities;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.TestedUserAnswer;
 import may.code.api.domains.UserShouldAnswer;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;

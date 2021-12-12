@@ -3,15 +3,12 @@ package may.code;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import may.code.api.domains.TestedUserStatus;
 import may.code.api.exeptions.NotFoundException;
 import may.code.api.store.entities.*;
 import may.code.api.store.repositories.*;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

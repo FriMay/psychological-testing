@@ -13,7 +13,6 @@ import may.code.api.store.entities.SchoolClassEntity;
 import may.code.api.store.entities.TestEntity;
 import may.code.api.store.repositories.TestAnswerRepository;
 import may.code.api.store.repositories.TestRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
