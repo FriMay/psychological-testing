@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.5.5'
+    id 'org.springframework.boot' version '2.6.1'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
@@ -11,12 +11,12 @@ bootJar {
     archiveFileName = "$project.name".concat(".jar")
 }
 
-repositories {
-    mavenCentral()
-}
-
 test {
     useJUnitPlatform()
+}
+
+repositories {
+    mavenCentral()
 }
 
 /**
@@ -29,14 +29,22 @@ dependencies {
 }
 
 /**
+ * Logging
+ */
+dependencies {
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.15.0'
+}
+
+/**
  * Other
  */
 dependencies {
-    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.9.11'
+    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.14.0'
 
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.19'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.3.1'
 
-    implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    implementation group: 'com.ibm.icu', name: 'icu4j', version: '70.1'
 }
 
 /**
@@ -53,9 +61,6 @@ dependencies {
  * Test
  */
 dependencies {
-    testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: '1.8.0-RC1'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.2'
-
     testImplementation group: 'org.springframework.security', name: 'spring-security-test'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }

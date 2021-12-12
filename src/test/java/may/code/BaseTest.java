@@ -6,15 +6,13 @@ import may.code.api.factory.TestAnswerDtoFactory;
 import may.code.api.factory.TestDtoFactory;
 import may.code.api.factory.TestedUserDtoFactory;
 import may.code.api.services.ControllerAuthenticationService;
+import may.code.api.services.TestService;
 import may.code.configs.WebConfig;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 
-@RunWith(JUnitPlatform.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import({
 
@@ -32,6 +30,7 @@ import org.springframework.context.annotation.Import;
         //Services
         ControllerAuthenticationService.class,
         TestData.class,
+        TestService.class
 })
 @AutoConfigureMockMvc
 @AutoConfigureDataJpa
