@@ -1,22 +1,28 @@
-CREATE OR REPLACE FUNCTION is_contains(compared jsonb, compare jsonb) RETURNS BOOL AS
+CREATE OR REPLACE FUNCTION intersections_count(compared jsonb, compare jsonb) RETURNS INT AS
 $$
 DECLARE
-    row jsonb;
+    cnt  INT;
+    row1 jsonb;
+    row2 jsonb;
 BEGIN
 
-    FOR row IN SELECT jsonb_array_elements(compared)
+    cnt := 0;
+
+    FOR row1 IN SELECT jsonb_array_elements(compared)
         LOOP
-            if (row -> 'question_id' = compare -> 'question_id'
-                AND row -> 'answer_id' = compare -> 'answer_id') THEN
-                RETURN TRUE;
-            END IF;
+            FOR row2 IN SELECT jsonb_array_elements(compare)
+                LOOP
+                    if (row1 -> 'answer_id' = row2 -> 'answer_id') THEN
+                        cnt := cnt + 1;
+                    END IF;
+                END LOOP;
         END LOOP;
 
-    RETURN FALSE;
+    RETURN cnt;
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION total_count(sample_test_id INT) RETURNS INT AS
+CREATE OR REPLACE FUNCTION total_count(person_template_id INT) RETURNS INT AS
 $$
 DECLARE
     cnt INT;
@@ -24,60 +30,22 @@ BEGIN
 
     SELECT count(answer)
     INTO cnt
-    FROM sample_test s
-             INNER JOIN jsonb_array_elements(s.tested_user_answers) AS answer ON s.id = sample_test_id;
+    FROM person_template pt
+             INNER JOIN jsonb_array_elements(pt.answers) AS answer ON pt.id = person_template_id;
 
     RETURN cnt;
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION avg_answer(start_at INT, sample_test_id INT) RETURNS FLOAT8 AS
-$$
-DECLARE
-    average FLOAT8;
-BEGIN
-
-    SELECT AVG((answer->'answer_id')::int) - start_at::FLOAT8
-    INTO average
-    FROM sample_test s
-             INNER JOIN jsonb_array_elements(s.tested_user_answers) AS answer ON s.id = sample_test_id;
-
-    RETURN average;
-END
-$$ LANGUAGE plpgsql;
-
-SELECT avg_answer(0, 47);
-
-SELECT id, TOTAL_COUNT(id), COUNT(answer)
-FROM sample_test s
-         INNER JOIN JSONB_ARRAY_ELEMENTS(s.tested_user_answers) AS answer ON s.test_id = 2
-WHERE IS_CONTAINS(
-              '[
-                {
-                  "answer_id": 1,
-                  "question_id": 2
-                },
-                {
-                  "answer_id": 2,
-                  "question_id": 3
-                }
-              ]'::jsonb,
-              answer
-          )
-GROUP BY id;
-
-SELECT avg((answer->'answer_id')::int) FROM JSONB_ARRAY_ELEMENTS('[
-  {
-    "answer_id": 1,
-    "question_id": 2
-  },
-  {
-    "answer_id": 2,
-    "question_id": 3
-  }
-]'::jsonb) as answer;
-
-SELECT id, sum((answer -> 'question_id')::int)
-FROM sample_test s
-         INNER JOIN JSONB_ARRAY_ELEMENTS(s.tested_user_answers) AS answer ON s.test_id = 2
-GROUP BY id;
+SELECT pt.id                                                                    AS personTemplateId,
+       intersections_count(pt.answers, ta.answers) / TOTAL_COUNT(pt.id)::float8 AS percentage,
+       TOTAL_COUNT(pt.id)                                                       AS totalAnswers,
+       intersections_count(pt.answers, ta.answers),
+       ta.id                                                                    AS testAnswerId,
+       t.id                                                                     AS testId
+FROM test_answer ta
+         INNER JOIN tested_user tu on ta.tested_user_id = tu.id
+         INNER JOIN school_class sc on tu.school_class_id = :schoolClass
+         INNER JOIN test t on ta.test_id = :testId
+         INNER JOIN person_template pt on t.id = pt.test_id
+GROUP BY t.id, ta.id, pt.id;
